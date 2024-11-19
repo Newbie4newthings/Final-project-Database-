@@ -1,0 +1,277 @@
+/* styles.css */
+
+/* General Styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+    background-image: url('wallpapersden.com_city-drawing-colorful_3840x2160.jpg'); /* Replace 'your-image.jpg' with your image URL or path */
+    background-size: cover; /* Ensures the image covers the entire header */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    border-radius: 15px; /* Curved edges */
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.main-wrapper{
+    padding-top: 150px;
+    
+    
+}
+
+/* Container Styling */
+.login-container, .loan-container, .register-container {
+    background-color: lightblue;/*  rgba(0, 0, 0, 0.2); Transparent white for magical effect */
+    border-radius: 12px;
+    padding: 25px;
+    align-items: center;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin-top: 15%;
+    text-decoration: black;
+}
+
+h2 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 0.9rem;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+input[type="text"], input[type="password"], input[type="number"] {
+    padding: 8px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+input[type="text"]::placeholder, input[type="password"]::placeholder, input[type="number"]::placeholder {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+button {
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #2575fc;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #6a11cb;
+}
+
+/* Transaction History Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+th, td {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+th {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+td {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Section Visibility */
+#transaction-history-section, #loan-section, #repayment-section {
+    display: none;
+    margin-top: 20px;
+}
+
+/* Loading Spinner */
+#loading-spinner {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+/* Logout and Transaction History Buttons */
+#transaction-history-btn, #logout-btn {
+    margin: 10px 5px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #ff4757;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#transaction-history-btn:hover, #logout-btn:hover {
+    background-color: #ff6b81;
+}
+
+.login-container p {
+    padding-top: 2rem;
+}
+
+.register-container p {
+    padding-top: 2rem;
+}
+
+
+/* General Header Styling */
+.app-header {
+
+    background-color: #f8f9fa; /* Light background for the header */
+    border-radius: 15px; /* Curved edges */
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+   
+    color: white; /* Ensures text is readable on a background image */
+}
+
+/* Navbar Styling */
+.navbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+}
+
+/* Left Section Styling */
+.navbar-nav:first-child {
+    display: flex;
+    align-items: center;
+}
+
+/* Image Styling */
+.nav-item img {
+    border-radius: 50%; /* Round shape */
+    margin-right: 15px; /* Space between image and text */
+    border: 2px solid rgba(255, 255, 255, 0.6); /* Optional: Border around the image */
+}
+
+/* Greeting Section Styling */
+#user-greeting h2 {
+    font-size: 1.2rem;
+    margin: 0;
+    padding: 0;
+    color: white; /* Text color for readability */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* Adds contrast to text */
+}
+
+/* Right Section Styling */
+.navbar-collapse {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-grow: 1;
+}
+
+/* Buttons Styling */
+.nav-item button {
+    background-color: rgba(0, 123, 255, 0.8); /* Semi-transparent blue background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Adds text contrast */
+}
+
+.nav-item button:hover {
+    background-color: rgba(0, 86, 179, 0.8); /* Darker semi-transparent blue */
+}
+
+/* Aligning Items Horizontally */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar {
+        flex-direction: column;
+    }
+
+    .navbar-collapse {
+        justify-content: flex-start;
+    }
+
+    #user-greeting h2 {
+        margin-top: 10px;
+    }
+
+    .nav-item button {
+        margin: 10px 0;
+    }
+}
+
+
+/* Curved Edged Box with Transparent Black Background */
+.boxer {
+    background-color: rgba(0, 0, 0, 0.6); /* Black color with 60% transparency */
+    border-radius: 15px; /* Curved edges */
+    padding: 20px; /* Inner spacing */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    color: #fff; /* White text for contrast */
+    margin: 20px auto; /* Center and add spacing around the container */
+    max-width: 90%; /* Ensures it’s responsive */
+    text-align: center; /* Optional: Center-align text inside */
+}

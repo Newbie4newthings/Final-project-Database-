@@ -1,0 +1,467 @@
+<!--public/loan.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Loan Wizard - Magic Loans</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+        <h1>The Loan Wizard</h1>
+       
+    <header class="app-header">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <ul class="navbar-nav">
+             <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+              <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+                <li class="nav-item">
+                  <a class="nav-link nav-icon-hover" aria-expanded="false">
+                    <img src="user-1.jpg" alt="" width="35" height="35" class="rounded-circle">
+                  </a>
+                </li>
+                <li class="nav-item">
+                        <section id="user-greeting" class="nav-link nav-icon-hover" aria-expanded="false" style="display: none;">
+                            <h2>Welcome, <span id="user-name"></span>!</h2>
+                        </section>
+                </li>
+                <li class="nav-item">
+                    <button id="transaction-history-btn" class="nav-link nav-icon-hover" aria-expanded="false" >View Transaction History</button> 
+                </li>
+                <li class="nav-item">
+                    <button id="logout-btn" class="nav-link nav-icon-hover" aria-expanded="false" >Logout</button>
+                </li>
+              </ul>
+             </div>
+          </ul>
+        </nav>
+      </header>
+
+    <main class="main-wrapper">
+        
+
+        <div id="loading-spinner" style="display: none;">Loading...</div>
+        
+        <section id="transaction-history-section" class="boxer" style="display: none;">
+            <h2>Transaction History</h2>
+            <button onclick="closeTransactionHistory()">Close</button>
+            <table id="transaction-history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount Paid</th>
+                        <th>Remaining Balance</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-history-body">
+                    <!-- Transaction rows will be added here dynamically -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Loan Selection -->
+        <section id="loan-section" class="boxer" style="display: none;">
+            <h2>Borrow Magical Coins</h2>
+            <input type="number" id="coin-amount" placeholder="Enter coin amount">
+            <div class="loan-options">
+                <button onclick="selectRepaymentOption(7, 5.5)">7 Days - 5.5% Interest</button>
+                <button onclick="selectRepaymentOption(14, 9.5)">14 Days - 9.5% Interest</button>
+                <button onclick="selectRepaymentOption(30, 24)">30 Days - 24% Interest</button>
+            </div>
+        </section>
+
+        <!-- Repayment Section -->
+        <section id="repayment-section" class="boxer" style="display: none;">
+            <h2>Repay Your Magical Loan</h2>
+            
+            <!-- Display remaining balance -->
+            <p id="remaining-balance">Remaining Balance: $0.00</p>
+            
+            <input type="number" id="repayment-amount" placeholder="Enter repayment amount">
+            <button onclick="makeRepayment()">Repay</button>
+        </section>
+        
+    </main>
+
+    <script>
+        // Load user data and check for existing loan
+        window.onload = async function() {
+    try {
+        // Fetch user data including remaining balance and name
+        const user = await getUserData();
+        const userName = await getUserName();
+
+        // Display user's name on the page
+        if (userName) {
+            const nameElement = document.getElementById('user-name');
+            nameElement.textContent = `${userName}`;
+            document.getElementById('user-greeting').style.display = 'block'; // make the greeting section visible
+        }
+
+        // Update the displayed remaining balance
+        const remainingBalanceElement = document.getElementById('remaining-balance');
+        remainingBalanceElement.textContent = `Remaining Balance: $${user.remaining_balance}`;
+
+        // Log the remaining balance to verify it's greater than 0
+        console.log("User data loaded:", user);
+        console.log("Remaining balance:", user.remaining_balance);
+
+        // Check the remaining balance and show the appropriate section
+        if (user.remaining_balance === null || user.remaining_balance === undefined || user.remaining_balance <= 0) {
+            console.log("Remaining balance is null, undefined, or less than or equal to 0, showing loan section");
+            showLoanSection();  // This should be called if balance is null, undefined, or <= 0
+        } else {
+            console.log("Remaining balance is greater than 0, showing repayment section");
+            showRepaymentSection();  // This should be called if balance > 0
+        }
+    } catch (error) {
+        console.error("Error loading user data:", error);
+        alert("An error occurred while loading user data. Please try again.");
+    }
+};
+
+// API call to check user data (including remaining balance)
+async function getUserData() {
+    try {
+        const response = await fetch('/api/loans/latest-balance');
+        if (!response.ok) {
+            throw new Error("Failed to fetch user data");
+        }
+        const data = await response.json();
+        console.log("Data received from API:", data);
+
+        if (!data || data.remaining_balance === null || data.remaining_balance === undefined || data.remaining_balance === '') {
+            console.error("Invalid data received: remaining_balance is null, undefined, or blank.");
+            return null;  // Return null if the data is invalid
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching user data:", error.message);
+        return null;
+    }
+}
+
+// API call to get user name
+async function getUserName() {
+    try {
+        const response = await fetch('/api/loans/get_user_name');
+        if (!response.ok) {
+            throw new Error("Failed to fetch user name");
+        }
+        const data = await response.json();
+        console.log("User name received from API:", data.name);
+        return data.name;
+    } catch (error) {
+        console.error("Error fetching user name:", error.message);
+        return null;
+    }
+}
+
+
+// Functions to show/hide sections based on loan status
+function showLoanSection() {
+    document.getElementById('loan-section').style.display = 'block';
+    document.getElementById('repayment-section').style.display = 'none';
+}
+
+function showRepaymentSection() {
+    console.log("Showing repayment section...");
+    document.getElementById('loan-section').style.display = 'none';
+    document.getElementById('repayment-section').style.display = 'block';
+}
+
+// Function to select a repayment option and create loan records
+async function selectRepaymentOption(days, interestRate) {
+    const coinAmount = parseFloat(document.getElementById('coin-amount').value);
+    
+    if (!coinAmount || coinAmount <= 0) {
+        alert("Please enter a valid coin amount.");
+        return;
+    }
+    await createLoan(coinAmount, interestRate, days);
+
+    alert(`Loan of ${coinAmount} coins with ${interestRate}% interest for ${days} days created!`);
+    showRepaymentSection();
+}
+
+// Function to display the repayment section after loan creation
+function showRepaymentSection() {
+    document.getElementById('repayment-section').style.display = 'block';
+}
+
+// Function to create a loan with interest rate and repayment schedule
+async function createLoan(coinAmount, interestRate, days) {
+    try {
+        // Step 1: Post the coin amount to the LoanAmounts table
+        const loanResponse = await fetch('/api/loans', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ coin_amount: coinAmount })
+        });
+
+        // Check if the response is okay
+        if (!loanResponse.ok) {
+            console.error('Loan creation failed:', loanResponse.status, loanResponse.statusText);
+            throw new Error(`Loan creation failed with status: ${loanResponse.status}`);
+        }
+
+        // Parse the JSON response
+        const loanData = await loanResponse.json();
+        console.log("Loan API response:", loanData);
+
+        // Check if the loan_id is present in the response
+        if (!loanData.loan_id) {
+            throw new Error('Loan ID not returned from /api/loans.');
+        }
+
+        const loanId = loanData.loan_id;
+
+        // Step 2: Save loan details with the loan ID
+        const loanDetails = { coinAmount, interestRate, days, loanId };
+        console.log("Loan Details:", loanDetails); // Log the details for debugging
+
+        // Step 3: Add the interest rate to the InterestRates table with the loan ID
+        await fetch('/api/interest-rates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ loan_id: loanId, interest_rate_percent: interestRate })
+        });
+
+        // Step 4: Calculate the due date and amount due, then add to the RepaymentSchedules table
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + days); // Calculate due date by adding days
+        const amountDue = coinAmount * (1 + interestRate / 100); // Total due with interest
+
+        await fetch('/api/repayments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                loan_id: loanId,
+                due_date: dueDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+                amount_due: amountDue
+            })
+        });
+
+        // Step 5: Add an initial entry to the TransactionHistories table with remaining balance
+        await fetch('/api/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                loan_id: loanId,
+                amount_paid: 0,
+                remaining_balance: amountDue,
+                remarks: "Loan Disbursed"
+            })
+        });
+
+        alert('Loan created successfully with repayment schedule!');
+    } catch (error) {
+        console.error('Error creating loan:', error);
+        alert('An error occurred while creating the loan. Please try again.');
+    }
+}
+
+// Function to make a repayment
+async function makeRepayment() {
+    const repaymentAmount = parseFloat(document.getElementById('repayment-amount').value);
+    if (!repaymentAmount || repaymentAmount <= 0) {
+        alert("Please enter a valid repayment amount");
+        return;
+    }
+
+    // Update repayment and transaction tables with new amount
+    await updateRepayment(repaymentAmount);
+    alert(`Repayment of ${repaymentAmount} coins successful!`);
+}
+
+async function updateRepayment(amount) {
+    try {
+        const paymentAmount = amount;
+
+        // Step 1: Call the correct endpoint for latest loan and repayment info
+        const response = await fetch('/api/repayments/getLatestLoanInfo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentAmount })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch loan info: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const { loanId, due_date, term_days, remaining_balance } = data;
+
+        console.log("Loan info received:", data);
+
+        // Step 2: Calculate new due date by adding term_days
+        const newDueDate = new Date(due_date);
+        newDueDate.setDate(newDueDate.getDate() + term_days);
+        console.log("Calculated new due date:", newDueDate.toISOString().split('T')[0]);
+
+        // Step 3: Calculate new remaining balance
+        const newRemainingBalance = remaining_balance - paymentAmount;
+        const remarks = newRemainingBalance <= 0 ? "Fully paid" : "Partial payment made";
+        console.log("Calculated new remaining balance:", newRemainingBalance);
+
+        // Step 4: Update the repayment schedule
+        const repaymentResponse = await fetch('/api/repayments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                loan_id: loanId,
+                due_date: newDueDate.toISOString().split('T')[0],
+                amount_due: paymentAmount,
+                status: 'paid'
+            })
+        });
+
+        if (!repaymentResponse.ok) {
+            throw new Error(`Error updating repayment schedule: ${repaymentResponse.statusText}`);
+        }
+
+        console.log("Repayment schedule updated successfully");
+
+        // Step 5: Record the transaction
+        const transactionResponse = await fetch('/api/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                loan_id: loanId,
+                amount_paid: paymentAmount,
+                remaining_balance: newRemainingBalance,
+                remarks: remarks
+            })
+        });
+
+        if (!transactionResponse.ok) {
+            throw new Error(`Error adding transaction record: ${transactionResponse.statusText}`);
+        }
+
+        console.log("Transaction recorded successfully");
+        alert(`Repayment of ${paymentAmount} coins processed successfully!`);
+
+    } catch (error) {
+        console.error("Error updating repayment:", error);
+        alert("An error occurred while processing your repayment. Please try again.");
+    }
+}
+
+// Function to view transaction history
+document.getElementById('transaction-history-btn').addEventListener('click', showTransactionHistory);
+
+async function showTransactionHistory() {
+    console.log("Transaction history button clicked.");
+
+    // Show loading spinner while fetching data
+    document.getElementById('loading-spinner').style.display = 'block';
+    console.log("Loading spinner displayed.");
+
+    try {
+        const response = await fetch('/api/transactions/transactions_details', {
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache',  // Disable caching
+            },
+        });
+        
+        console.log("API request made to '/api/transactions/transactions_details'. Response status: ", response.status);
+
+        // Hide loading spinner after data is fetched
+        document.getElementById('loading-spinner').style.display = 'none';
+        console.log("Loading spinner hidden after response.");
+
+        // Check if the response is ok (status code in the 2xx range)
+        if (!response.ok) {
+            const errorMessage = await response.text();  // Get additional error details if available
+            console.error(`HTTP error! Status: ${response.status} - ${errorMessage}`);
+            throw new Error(`HTTP error! Status: ${response.status} - ${errorMessage}`);
+        }
+
+        // Parse the response JSON
+        const data = await response.json();
+        console.log("Data received from API:", data);
+
+        const transactions = data.transactions;
+
+        // Check if the transactions array is empty
+        if (!Array.isArray(transactions)) {
+            console.error("The 'transactions' property is not an array. Received:", transactions);
+            return;
+        }
+
+        console.log("Transactions array received:", transactions);
+
+        // Check if no transactions were returned
+        const tableBody = document.getElementById('transaction-history-body');
+        tableBody.innerHTML = '';  // Clear previous content
+        console.log("Previous table content cleared.");
+
+        if (transactions.length === 0) {
+            console.log("No transactions found.");
+            tableBody.innerHTML = '<tr><td colspan="4">No transaction history found.</td></tr>';
+            return;
+        }
+
+        // Populate the table with the transaction history
+        transactions.forEach(transaction => {
+            console.log("Processing transaction:", transaction);
+
+            const date = new Date(transaction.transaction_date);
+            const formattedDate = date.toLocaleDateString();  // Format the date
+            console.log("Formatted transaction date:", formattedDate);
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${transaction.amount_paid}</td>
+                <td>${transaction.remaining_balance}</td>
+                <td>${transaction.remarks}</td>
+            `;
+            tableBody.appendChild(row);
+            console.log("Row added to table for transaction:", transaction);
+        });
+
+        // Show the transaction history section
+        document.getElementById('transaction-history-section').style.display = 'block';
+        console.log("Transaction history section displayed.");
+
+    } catch (error) {
+        console.error("Error fetching transaction history:", error);
+        alert("Failed to load transaction history.");
+    }
+}
+
+function closeTransactionHistory() {
+    document.getElementById('transaction-history-section').style.display = 'none';
+}
+
+
+// Logout function
+document.getElementById('logout-btn').onclick = function() {
+    fetch('/api/users/logout', { method: 'POST' })
+        .then(() => {
+            alert('Logged out successfully');
+            window.location.href = '/login'; // Redirect to login page
+        });
+};
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+    // Clear token or session data from local storage or session storage
+    localStorage.removeItem('authToken');  // Remove token if stored in localStorage
+    sessionStorage.removeItem('authToken'); // Remove token if stored in sessionStorage
+
+    // Optionally clear other stored data related to user session
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Redirect to the login page
+    window.location.href = 'login.html';
+});
+
+    </script>
+</body>
+</html>

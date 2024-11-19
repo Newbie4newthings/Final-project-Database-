@@ -1,0 +1,131 @@
+<!--public/register.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Loan Wizard - Register</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+
+    <div class="register-container">
+        <h2>Create a New Account</h2>
+        <form id="RegisterForm"> <!-- Backend file to process registration -->
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required>
+
+            <label for="magic_email">Magic Email</label>
+            <input type="text" id="magic_email" name="magic_email" placeholder="Enter your magical email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Choose a secure password" required>
+
+            <label for="role">Role</label>
+            <input type="text" id="role" name="role" placeholder="Enter your role (e.g., wizard, borrower)" required>
+
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="login.html">Login here</a></p> <!-- Link to login page -->
+    </div>
+<script>
+    // register.js
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form');
+    const nameInput = document.querySelector('#name');
+    const emailInput = document.querySelector('#magic_email');
+    const passwordInput = document.querySelector('#password');
+    const roleInput = document.querySelector('#role');
+
+    form.addEventListener('submit', async (event) => {
+        // Prevent default form submission
+        event.preventDefault();
+
+        // Clear previous error messages
+        clearErrors();
+
+        // Validate fields
+        let isValid = true;
+
+        if (!nameInput.value.trim()) {
+            displayError(nameInput, 'Name is required');
+            isValid = false;
+        }
+
+        if (!emailInput.value.trim()) {
+            displayError(emailInput, 'Magic Email is required');
+            isValid = false;
+        } else if (!isValidEmail(emailInput.value)) {
+            displayError(emailInput, 'Enter a valid email address');
+            isValid = false;
+        }
+
+        if (!passwordInput.value.trim()) {
+            displayError(passwordInput, 'Password is required');
+            isValid = false;
+        } else if (passwordInput.value.length < 6) {
+            displayError(passwordInput, 'Password must be at least 6 characters long');
+            isValid = false;
+        }
+
+        if (!roleInput.value.trim()) {
+            displayError(roleInput, 'Role is required');
+            isValid = false;
+        }
+
+        // If the form is valid, send the data to the backend
+        if (isValid) {
+            try {
+                const response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: nameInput.value.trim(),
+                        magic_email: emailInput.value.trim(),
+                        password: passwordInput.value.trim(),
+                        role: roleInput.value.trim()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Registration successful!');
+                    window.location.href = 'login.html'; // Redirect to login page
+                } else {
+                    // Display error from the server
+                    displayError(form, data.message || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                displayError(form, 'An error occurred. Please try again later.');
+                console.error('Error:', error);
+            }
+        }
+    });
+
+    // Utility functions
+
+    function clearErrors() {
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach(error => error.remove());
+    }
+
+    function displayError(input, message) {
+        const error = document.createElement('div');
+        error.className = 'error-message';
+        error.textContent = message;
+        input.parentNode.insertBefore(error, input.nextSibling);
+    }
+
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+});
+
+</script>
+</body>
+</html>
